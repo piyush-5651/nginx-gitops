@@ -1,0 +1,22 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to VM
+      run: |
+        ssh username@your-vm-ip << EOF
+        cd /path/to/nginx-gitops
+        git pull origin main
+        ./deploy.sh
+        EOF
