@@ -21,7 +21,7 @@ jobs:
     - name: Deploy to VM
       run: |
         sshpass -p 'piyush@12345' ssh ubuntu@172.177.187.189 << EOF
-        cd /path/to/nginx-gitops
+        cd /root/nginx-gitops
         git pull origin main
         ./deploy.sh
         EOF
