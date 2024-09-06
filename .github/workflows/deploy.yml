@@ -21,7 +21,7 @@ jobs:
     - name: Deploy to VM
       run: |
         sshpass -p 'piyush@12345' ssh -t ubuntu@172.177.187.189 << EOF
-        cd /root/devops
+        cd /home/ubuntu
         git pull origin main
         ./deploy.sh
         EOF
