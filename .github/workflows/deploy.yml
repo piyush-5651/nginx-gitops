@@ -1,4 +1,4 @@
-name: Install and Deploy NGINX on Local Windows System
+name: Deploy to VM
 
 on:
   push:
@@ -7,70 +7,14 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Ensure your GitHub runner is configured on the local system
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Create required directories if they do not exist
-      shell: powershell
+    - name: Deploy application
       run: |
-        $nginxPath = "C:/nginx"
-        $confPath = "C:/nginx/conf"
-        $workflowPath = "D:/workflow/nginx-gitops"
-        
-        # Create NGINX folder if it doesn't exist
-        if (-Not (Test-Path $nginxPath)) {
-          New-Item -ItemType Directory -Path $nginxPath -Force
-          Write-Host "Created NGINX directory: $nginxPath"
-        }
-
-        # Create NGINX conf folder if it doesn't exist
-        if (-Not (Test-Path $confPath)) {
-          New-Item -ItemType Directory -Path $confPath -Force
-          Write-Host "Created NGINX conf directory: $confPath"
-        }
-
-        # Create workflow directory if it doesn't exist
-        if (-Not (Test-Path $workflowPath)) {
-          New-Item -ItemType Directory -Path $workflowPath -Force
-          Write-Host "Created workflow directory: $workflowPath"
-        }
-
-    - name: Install NGINX if not installed
-      shell: powershell
-      run: |
-        if (-Not (Test-Path "C:/nginx/nginx.exe")) {
-          Write-Host "NGINX not found, installing..."
-          Invoke-WebRequest -Uri "https://nginx.org/download/nginx-1.24.0.zip" -OutFile "nginx.zip"
-          Expand-Archive -Path "nginx.zip" -DestinationPath "C:/"
-          Rename-Item -Path "C:/nginx-1.24.0" -NewName "nginx"
-          Write-Host "NGINX installed successfully!"
-        } else {
-          Write-Host "NGINX is already installed."
-        }
-
-    - name: Stop NGINX if running
-      shell: powershell
-      run: |
-        Stop-Process -Name "nginx" -Force -ErrorAction SilentlyContinue
-        Write-Host "NGINX stopped."
-
-    - name: Pull latest code
-      shell: powershell
-      run: |
-        cd D:/workflow/nginx-gitops
+        cd /home/ubuntu/nginx-gitops
         git pull origin main
-
-    - name: Copy updated configuration to NGINX folder
-      shell: powershell
-      run: |
-        Copy-Item -Path D:/workflow/nginx-gitops/src/nginx.conf -Destination "C:/nginx/conf/nginx.conf" -Force
-        Write-Host "Configuration updated."
-
-    - name: Start NGINX
-      shell: powershell
-      run: |
-        Start-Process "C:/nginx/nginx.exe"
-        Write-Host "NGINX started."
+        ./deploy.sh
