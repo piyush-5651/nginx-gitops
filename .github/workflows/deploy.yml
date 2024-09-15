@@ -13,11 +13,35 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install NGINX if not installed
+    - name: Create required directories if they do not exist
       shell: powershell
       run: |
         $nginxPath = "C:/nginx"
+        $confPath = "C:/nginx/conf"
+        $workflowPath = "D:/workflow/nginx-gitops"
+        
+        # Create NGINX folder if it doesn't exist
         if (-Not (Test-Path $nginxPath)) {
+          New-Item -ItemType Directory -Path $nginxPath -Force
+          Write-Host "Created NGINX directory: $nginxPath"
+        }
+
+        # Create NGINX conf folder if it doesn't exist
+        if (-Not (Test-Path $confPath)) {
+          New-Item -ItemType Directory -Path $confPath -Force
+          Write-Host "Created NGINX conf directory: $confPath"
+        }
+
+        # Create workflow directory if it doesn't exist
+        if (-Not (Test-Path $workflowPath)) {
+          New-Item -ItemType Directory -Path $workflowPath -Force
+          Write-Host "Created workflow directory: $workflowPath"
+        }
+
+    - name: Install NGINX if not installed
+      shell: powershell
+      run: |
+        if (-Not (Test-Path "C:/nginx/nginx.exe")) {
           Write-Host "NGINX not found, installing..."
           Invoke-WebRequest -Uri "https://nginx.org/download/nginx-1.24.0.zip" -OutFile "nginx.zip"
           Expand-Archive -Path "nginx.zip" -DestinationPath "C:/"
