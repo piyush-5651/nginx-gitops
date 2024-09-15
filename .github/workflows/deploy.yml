@@ -66,7 +66,7 @@ jobs:
     - name: Copy updated configuration to NGINX folder
       shell: powershell
       run: |
-        Copy-Item -Path D:/workflow/nginx-gitops/nginx.conf -Destination "C:/nginx/conf/nginx.conf" -Force
+        Copy-Item -Path D:/workflow/nginx-gitops/src/nginx.conf -Destination "C:/nginx/conf/nginx.conf" -Force
         Write-Host "Configuration updated."
 
     - name: Start NGINX
