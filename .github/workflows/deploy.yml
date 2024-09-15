@@ -1,4 +1,4 @@
-name: Deploy to VM
+name: Install and Deploy NGINX on Local Windows System
 
 on:
   push:
@@ -7,21 +7,46 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Ensure your GitHub runner is configured on the local system
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install sshpass
+    - name: Install NGINX if not installed
+      shell: powershell
       run: |
-        sudo apt-get update
-        sudo apt-get install -y sshpass
+        $nginxPath = "C:/nginx"
+        if (-Not (Test-Path $nginxPath)) {
+          Write-Host "NGINX not found, installing..."
+          Invoke-WebRequest -Uri "https://nginx.org/download/nginx-1.24.0.zip" -OutFile "nginx.zip"
+          Expand-Archive -Path "nginx.zip" -DestinationPath "C:/"
+          Rename-Item -Path "C:/nginx-1.24.0" -NewName "nginx"
+          Write-Host "NGINX installed successfully!"
+        } else {
+          Write-Host "NGINX is already installed."
+        }
 
-    - name: Deploy to VM
+    - name: Stop NGINX if running
+      shell: powershell
       run: |
-        sshpass -p 'piyush@12345' ssh -t ubuntu@172.177.187.189 << EOF
-        cd /home/ubuntu
+        Stop-Process -Name "nginx" -Force -ErrorAction SilentlyContinue
+        Write-Host "NGINX stopped."
+
+    - name: Pull latest code
+      shell: powershell
+      run: |
+        cd D:/workflow/nginx-gitops
         git pull origin main
-        ./deploy.sh
-        EOF
+
+    - name: Copy updated configuration to NGINX folder
+      shell: powershell
+      run: |
+        Copy-Item -Path D:/workflow/nginx-gitops/nginx.conf -Destination "C:/nginx/conf/nginx.conf" -Force
+        Write-Host "Configuration updated."
+
+    - name: Start NGINX
+      shell: powershell
+      run: |
+        Start-Process "C:/nginx/nginx.exe"
+        Write-Host "NGINX started."
