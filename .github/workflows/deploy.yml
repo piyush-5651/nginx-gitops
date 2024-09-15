@@ -13,6 +13,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set execute permission for deploy.sh
+      run: chmod +x /home/ubuntu/nginx-gitops/deploy.sh
+
     - name: Deploy application
       run: |
         cd /home/ubuntu/nginx-gitops
